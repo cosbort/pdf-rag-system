@@ -1,0 +1,41 @@
+# File di ambiente con chiavi API
+.env
+
+# Directory di cache e database vettoriale
+/cache/
+/vector_db/
+
+# Directory dei documenti PDF
+/docs/
+
+# File di Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Ambiente virtuale
+venv/
+ENV/
+
+# IDE e editor
+.idea/
+.vscode/
+*.swp
+*.swo
