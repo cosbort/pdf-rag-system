@@ -58,26 +58,6 @@ def set_page_config():
         .message-content {
             margin-top: 0.5rem;
         }
-        .document-card {
-            padding: 1rem;
-            border-radius: 5px;
-            background-color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            margin-bottom: 0.5rem;
-        }
-        .document-title {
-            font-weight: bold;
-            color: #4F8BF9;
-        }
-        .document-info {
-            font-size: 0.8em;
-            color: #6c757d;
-        }
-        .document-actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 0.5rem;
-        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -119,8 +99,7 @@ def initialize_session_state():
             "k": 4,
             "use_multi_query": False,
             "chunk_size": 1000,
-            "chunk_overlap": 200,
-            "index_type": "faiss"
+            "chunk_overlap": 200
         }
     
     # Inizializza lo stato dell'indice
@@ -138,11 +117,6 @@ def check_index_status():
     # Per FAISS, controlla se esistono i file dell'indice
     faiss_files = [f for f in os.listdir(vector_db_dir) if f.endswith('.faiss') or f.endswith('.pkl')]
     if faiss_files:
-        return True
-    
-    # Per Chroma, controlla se esistono le directory di Chroma
-    chroma_dirs = [d for d in os.listdir(vector_db_dir) if os.path.isdir(os.path.join(vector_db_dir, d))]
-    if chroma_dirs:
         return True
     
     return False

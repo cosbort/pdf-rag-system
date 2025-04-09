@@ -53,23 +53,15 @@ def run_indexing_process():
         )
         
         # Inizializza il gestore del database vettoriale
-        if settings['index_type'] == "chroma":
-            with st.session_state.get("indexing_status_placeholder"):
-                st.write("Creazione del database Chroma...")
-            vector_store_manager = VectorStoreManager(
-                persist_directory=vector_db_dir
-            )
-            # Crea il database Chroma
-            vector_store = vector_store_manager.create_chroma_db(chunks)
-        else:  # faiss
-            with st.session_state.get("indexing_status_placeholder"):
-                st.write("Creazione dell'indice FAISS...")
-            vector_store_manager = VectorStoreManager()
-            # Crea l'indice FAISS
-            vector_store = vector_store_manager.create_faiss_index(
-                chunks, 
-                save_path=vector_db_dir
-            )
+        # Utilizziamo solo FAISS per semplicità
+        with st.session_state.get("indexing_status_placeholder"):
+            st.write("Creazione dell'indice FAISS...")
+        vector_store_manager = VectorStoreManager()
+        # Crea l'indice FAISS
+        vector_store = vector_store_manager.create_faiss_index(
+            chunks, 
+            save_path=vector_db_dir
+        )
         
         # Salva le impostazioni
         save_retriever_settings()
@@ -91,7 +83,7 @@ def run_indexing_process():
 def display_sidebar():
     """Visualizza la sidebar dell'applicazione."""
     with st.sidebar:
-        st.image("https://raw.githubusercontent.com/cosbort/pdf-rag-system/master/docs/logo.png", width=100, use_column_width=False)
+        st.title("📚 PDF RAG System")
         
         # Sezione modello
         st.subheader("🤖 Modello LLM")
@@ -143,18 +135,8 @@ def display_sidebar():
         else:
             for doc in documents:
                 with st.container():
-                    st.markdown(
-                        f"""
-                        <div class='document-card'>
-                            <div class='document-title'>{doc['filename']}</div>
-                            <div class='document-info'>
-                                Dimensione: {format_file_size(doc['size'])} | 
-                                Modificato: {format_timestamp(doc['modified'])}
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                    st.markdown(f"**{doc['filename']}**")
+                    st.caption(f"Dimensione: {format_file_size(doc['size'])} | Modificato: {format_timestamp(doc['modified'])}")
             
             # Selezione documento da eliminare
             if len(documents) > 0:
@@ -191,15 +173,6 @@ def display_sidebar():
         
         # Impostazioni del retriever
         with st.expander("⚙️ Impostazioni Avanzate"):
-            # Tipo di indice
-            index_type = st.radio(
-                "Tipo di indice:",
-                options=["faiss", "chroma"],
-                index=0 if st.session_state.retriever_settings['index_type'] == "faiss" else 1,
-                key="index_type"
-            )
-            st.session_state.retriever_settings['index_type'] = index_type
-            
             # Dimensione dei chunk
             chunk_size = st.slider(
                 "Dimensione dei chunk (caratteri):",
@@ -280,7 +253,7 @@ def display_sidebar():
             Sviluppato con:
             - LangChain
             - OpenAI
-            - FAISS/Chroma
+            - FAISS
             - Streamlit
             
             [GitHub Repository](https://github.com/cosbort/pdf-rag-system)

@@ -54,17 +54,10 @@ def process_query(question):
         settings = st.session_state.retriever_settings
         vector_db_dir = st.session_state.vector_db_dir
         
-        # Inizializza il gestore del database vettoriale
-        if settings['index_type'] == "chroma":
-            vector_store_manager = VectorStoreManager(
-                persist_directory=vector_db_dir
-            )
-            # Carica il database Chroma
-            vector_store = vector_store_manager.load_chroma_db()
-        else:  # faiss
-            vector_store_manager = VectorStoreManager()
-            # Carica l'indice FAISS
-            vector_store = vector_store_manager.load_faiss_index(vector_db_dir)
+        # Inizializza il gestore del database vettoriale - usiamo solo FAISS
+        vector_store_manager = VectorStoreManager()
+        # Carica l'indice FAISS
+        vector_store = vector_store_manager.load_faiss_index(vector_db_dir)
         
         # Ottieni il retriever
         base_retriever = vector_store_manager.get_retriever(k=settings['k'])
