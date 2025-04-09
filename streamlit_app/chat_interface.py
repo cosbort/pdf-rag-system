@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import uuid
+import base64
 from pathlib import Path
 import threading
 
@@ -16,6 +17,20 @@ from vector_store import VectorStoreManager
 from rag_generator import RAGGenerator
 from advanced_retrieval import QueryTransformer, MultiQueryRetriever
 from cache_manager import QueryCache
+
+# Immagine del robot in formato base64
+ROBOT_IMAGE = """
+iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVMQEAIAzAMMC/5+GiHCQK
+enXPzCzV9wOwZgCkGQBpBkCaAZBmAKQZAGkGQJoBkGYApBkAaQZAmgGQZgCkGQBpBkCaAZBmAKQZAGkG
+QJoBkGYApBkAaQZAmgGQZgCkGQBpBkCaAZBmAKQZAGkGQJoBkGYApBkAaQZAmgGQZgCkGQBpBkCaAZBm
+AKQZAGkGQJoBkGYApBkAaQZAmgGQZgCkGQBpBkCaAZBmAKQZAGkGQJoBkGYApBkAaQZAmgGQZgCkGQBp
+BkCaAZBmAKQZAGkGQJoBkGYApBkAaQZAmgGQZgCkGQBpBkCaAZBmAKQZAGkGQJoBkGYApBkAaQZA2gNi2QkGrSG9
+DAAAAABJRU5ErkJggg==
+"""
+
+def get_image_base64():
+    """Restituisce l'immagine del robot in formato base64."""
+    return ROBOT_IMAGE
 
 def process_query(question):
     """
@@ -101,11 +116,8 @@ def display_chat_interface():
     chat_container = st.container()
     
     with chat_container:
-        # Aggiungi l'immagine esplicativa del sistema RAG
-        st.image(
-            "https://www.diariodiunanalista.it/content/images/size/w1600/2023/11/image-16.png",
-            use_column_width=True
-        )
+        # Aggiungi l'immagine del robot
+        st.image(base64.b64decode(get_image_base64()), use_column_width=True)
         
         # Visualizza la cronologia dei messaggi
         for message in st.session_state.messages:
