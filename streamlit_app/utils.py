@@ -64,18 +64,21 @@ def set_page_config():
     )
 
 def initialize_session_state():
-    """Inizializza le variabili di sessione."""
+    """Inizializza tutte le variabili di sessione necessarie."""
+    
     # Directory per i documenti PDF
     if "pdf_dir" not in st.session_state:
-        st.session_state.pdf_dir = os.path.join(os.getcwd(), "documents")
         # Crea la directory se non esiste
-        os.makedirs(st.session_state.pdf_dir, exist_ok=True)
+        pdf_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "documents")
+        os.makedirs(pdf_dir, exist_ok=True)
+        st.session_state.pdf_dir = pdf_dir
     
     # Directory per il database vettoriale
     if "vector_db_dir" not in st.session_state:
-        st.session_state.vector_db_dir = os.path.join(os.getcwd(), "vector_db")
         # Crea la directory se non esiste
-        os.makedirs(st.session_state.vector_db_dir, exist_ok=True)
+        vector_db_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vector_db")
+        os.makedirs(vector_db_dir, exist_ok=True)
+        st.session_state.vector_db_dir = vector_db_dir
     
     # Modello LLM predefinito
     if "model" not in st.session_state:
