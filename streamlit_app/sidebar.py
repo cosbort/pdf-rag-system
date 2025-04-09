@@ -249,19 +249,22 @@ def display_sidebar():
         if "indexing_in_progress" not in st.session_state:
             st.session_state.indexing_in_progress = False
         
+        # Placeholder per lo stato dell'indicizzazione
+        if "indexing_status_placeholder" not in st.session_state:
+            st.session_state.indexing_status_placeholder = st.empty()
+        
         if st.session_state.indexing_in_progress:
             st.info("Indicizzazione in corso...")
             
-            # Placeholder per lo stato dell'indicizzazione
-            if "indexing_status_placeholder" not in st.session_state:
-                st.session_state.indexing_status_placeholder = st.empty()
+            # Mostra lo stato dell'indicizzazione nel placeholder
+            with st.session_state.indexing_status_placeholder:
+                st.write("In attesa di aggiornamenti...")
         else:
             if st.button("🔍 Indicizza documenti"):
                 if not documents:
                     st.error("Nessun documento da indicizzare. Carica almeno un documento PDF.")
                 else:
                     st.session_state.indexing_in_progress = True
-                    st.session_state.indexing_status_placeholder = st.empty()
                     
                     # Avvia il processo di indicizzazione in un thread separato
                     threading.Thread(target=run_indexing_process).start()
