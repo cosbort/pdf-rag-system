@@ -34,6 +34,21 @@ Un sistema avanzato di Retrieval Augmented Generation (RAG) per l'analisi di doc
 
 ## Utilizzo
 
+### Interfaccia Grafica Streamlit
+
+Il modo più semplice per utilizzare il sistema è attraverso l'interfaccia grafica Streamlit:
+
+```
+python run_streamlit_app.py
+```
+
+L'interfaccia grafica offre:
+- Caricamento e gestione dei documenti PDF
+- Configurazione delle impostazioni del sistema
+- Interfaccia di chat intuitiva per porre domande
+- Visualizzazione dei documenti di riferimento per ogni risposta
+- Esportazione della cronologia delle conversazioni
+
 ### Indicizzazione dei Documenti
 
 Per indicizzare una cartella di documenti PDF:
