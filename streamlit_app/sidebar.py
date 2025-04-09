@@ -240,7 +240,7 @@ def display_sidebar():
                     
                     # Avvia il processo di indicizzazione in un thread separato
                     threading.Thread(target=run_indexing_process).start()
-                    st.experimental_rerun()
+                    st.rerun()
         
         # Separatore
         st.markdown("---")

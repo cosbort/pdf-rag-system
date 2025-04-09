@@ -191,7 +191,7 @@ def display_chat_interface():
     with col1:
         if st.button("🗑️ Cancella Cronologia", key="clear_history"):
             st.session_state.messages = []
-            st.experimental_rerun()
+            st.rerun()
     
     with col2:
         if st.button("💾 Esporta Cronologia", key="export_history"):
