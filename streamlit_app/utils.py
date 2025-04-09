@@ -64,47 +64,47 @@ def set_page_config():
     )
 
 def initialize_session_state():
-    """Inizializza lo stato della sessione Streamlit."""
-    # Inizializza la cronologia dei messaggi
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-    
-    # Inizializza l'ID della sessione
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = None
-    
-    # Inizializza la lista dei documenti
-    if "documents" not in st.session_state:
-        st.session_state.documents = []
-    
-    # Inizializza il modello selezionato
-    if "model" not in st.session_state:
-        st.session_state.model = "gpt-4o"
-    
-    # Inizializza il percorso della directory dei documenti
+    """Inizializza le variabili di sessione."""
+    # Directory per i documenti PDF
     if "pdf_dir" not in st.session_state:
-        st.session_state.pdf_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs")
+        st.session_state.pdf_dir = os.path.join(os.getcwd(), "documents")
         # Crea la directory se non esiste
         os.makedirs(st.session_state.pdf_dir, exist_ok=True)
     
-    # Inizializza il percorso della directory del database vettoriale
+    # Directory per il database vettoriale
     if "vector_db_dir" not in st.session_state:
-        st.session_state.vector_db_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "vector_db")
+        st.session_state.vector_db_dir = os.path.join(os.getcwd(), "vector_db")
         # Crea la directory se non esiste
         os.makedirs(st.session_state.vector_db_dir, exist_ok=True)
     
-    # Inizializza le impostazioni del retriever
+    # Modello LLM predefinito
+    if "model" not in st.session_state:
+        st.session_state.model = "gpt-3.5-turbo"
+    
+    # Impostazioni del retriever
     if "retriever_settings" not in st.session_state:
         st.session_state.retriever_settings = {
-            "k": 4,
-            "use_multi_query": False,
             "chunk_size": 1000,
-            "chunk_overlap": 200
+            "chunk_overlap": 200,
+            "k": 4,
+            "use_multi_query": False
         }
     
-    # Inizializza lo stato dell'indice
+    # Stato dell'indice
     if "index_status" not in st.session_state:
         st.session_state.index_status = check_index_status()
+    
+    # Cronologia dei messaggi
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    # Lista dei documenti
+    if "documents" not in st.session_state:
+        st.session_state.documents = get_document_list()
+    
+    # Stato dell'indicizzazione
+    if "indexing_in_progress" not in st.session_state:
+        st.session_state.indexing_in_progress = False
 
 def check_index_status():
     """Controlla se l'indice vettoriale esiste."""

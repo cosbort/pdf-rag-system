@@ -13,7 +13,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Importa i componenti dell'interfaccia
 from streamlit_app.sidebar import display_sidebar
 from streamlit_app.chat_interface import display_chat_interface
-from streamlit_app.utils import initialize_session_state, set_page_config
+from streamlit_app.utils import set_page_config, initialize_session_state
 
 def main():
     """Funzione principale dell'applicazione Streamlit."""
