@@ -1,88 +1,81 @@
-# Sistema RAG per l'Analisi di Documenti PDF
+# PDF RAG System
 
-Un sistema avanzato di Retrieval Augmented Generation (RAG) per l'analisi di documenti PDF utilizzando LangChain e le migliori tecniche implementative.
+Sistema avanzato di Retrieval Augmented Generation per l'analisi di documenti PDF.
+
+## Descrizione
+
+Questo sistema utilizza tecniche di RAG (Retrieval Augmented Generation) per analizzare documenti PDF e rispondere a domande basate sul loro contenuto. Combina modelli di linguaggio di grandi dimensioni con tecniche di recupero di informazioni per fornire risposte precise e contestuali.
 
 ## Caratteristiche
 
-- **Caricamento e Processamento PDF**: Supporto per il caricamento di documenti PDF da una cartella, incluse sottocartelle
-- **Chunking Intelligente**: Divisione dei documenti in chunks ottimali con sovrapposizione configurabile
-- **Database Vettoriale**: Supporto per FAISS (locale, veloce) e Chroma (persistente)
-- **Tecniche Avanzate di Retrieval**:
-  - Multi-query retrieval per migliorare la qualità dei risultati
-  - Query expansion per arricchire le query dell'utente
-  - Ensemble retrieval per combinare diversi approcci
-- **Caching**: Sistema di cache per le query per migliorare le prestazioni
-- **Valutazione**: Strumenti per valutare la qualità delle risposte e la pertinenza dei documenti
-- **Interfaccia CLI**: Interfaccia a riga di comando completa e flessibile
+- **Caricamento e analisi di documenti PDF**
+- **Indicizzazione vettoriale con FAISS**
+- **Interfaccia grafica con Streamlit**
+- **Risposte contestuali basate sui documenti**
+- **Cache per migliorare i tempi di risposta**
+- **Tecniche avanzate di retrieval (multi-query)**
+- **Valutazione delle prestazioni**
 
 ## Installazione
 
-1. Clona il repository o copia i file in una directory locale
-2. Crea un ambiente virtuale Python:
+1. Clona il repository:
    ```
-   python -m venv venv
-   venv\Scripts\activate
+   git clone https://github.com/cosbort/pdf-rag-system.git
+   cd pdf-rag-system
    ```
-3. Installa le dipendenze:
+
+2. Installa le dipendenze:
    ```
    pip install -r requirements.txt
    ```
-4. Configura le tue chiavi API nel file `.env`:
+
+3. Configura la tua chiave API OpenAI:
    ```
-   OPENAI_API_KEY=your_openai_api_key_here
+   # Crea un file .env nella directory principale
+   echo "OPENAI_API_KEY=your_api_key_here" > .env
    ```
 
 ## Utilizzo
 
 ### Interfaccia Grafica Streamlit
 
-Il modo più semplice per utilizzare il sistema è attraverso l'interfaccia grafica Streamlit:
+Per avviare l'interfaccia grafica Streamlit:
 
 ```
 python run_streamlit_app.py
 ```
 
-L'interfaccia grafica offre:
-- Caricamento e gestione dei documenti PDF
-- Configurazione delle impostazioni del sistema
-- Interfaccia di chat intuitiva per porre domande
-- Visualizzazione dei documenti di riferimento per ogni risposta
-- Esportazione della cronologia delle conversazioni
-
-### Indicizzazione dei Documenti
-
-Per indicizzare una cartella di documenti PDF:
+oppure:
 
 ```
-python cli.py index --pdf_dir "percorso/ai/tuoi/pdf" --index_type faiss --persist_dir "./vector_db"
+streamlit run streamlit_app/app.py
+```
+
+L'interfaccia Streamlit ti permetterà di:
+- Caricare documenti PDF tramite l'interfaccia web
+- Indicizzare i documenti con parametri personalizzabili
+- Fare domande sui tuoi documenti
+- Visualizzare le risposte con i documenti di riferimento
+- Esportare la cronologia delle chat
+
+### Interfaccia a Riga di Comando
+
+#### Indicizzazione dei documenti
+
+Per indicizzare i tuoi documenti PDF:
+
+```
+python cli.py index --pdf_dir "C:\Documenti\Manuali" --index_type faiss
 ```
 
 Opzioni:
-- `--pdf_dir`: Directory contenente i documenti PDF (obbligatorio)
+- `--pdf_dir`: Directory contenente i documenti PDF
 - `--index_type`: Tipo di indice vettoriale (`faiss` o `chroma`, default: `faiss`)
 - `--persist_dir`: Directory dove salvare l'indice (default: `./vector_db`)
 - `--chunk_size`: Dimensione dei chunk in caratteri (default: 1000)
-- `--chunk_overlap`: Sovrapposizione tra i chunk in caratteri (default: 200)
+- `--chunk_overlap`: Sovrapposizione dei chunk in caratteri (default: 200)
 
-### Interrogazione del Sistema
-
-Per porre una singola domanda al sistema:
-
-```
-python cli.py query --question "La tua domanda qui" --index_type faiss --persist_dir "./vector_db"
-```
-
-Opzioni:
-- `--question`: Domanda da porre al sistema (se omessa, verrà richiesta)
-- `--index_type`: Tipo di indice vettoriale (`faiss` o `chroma`, default: `faiss`)
-- `--persist_dir`: Directory da cui caricare l'indice (default: `./vector_db`)
-- `--k`: Numero di documenti da recuperare (default: 4)
-- `--use_cache`: Utilizza la cache per le query
-- `--use_multi_query`: Utilizza la tecnica multi-query per migliorare i risultati
-- `--show_docs`: Mostra i documenti recuperati
-- `--evaluate`: Valuta la qualità della risposta
-
-### Modalità Interattiva
+#### Modalità Interattiva
 
 Per avviare la modalità interattiva:
 
@@ -121,23 +114,11 @@ Opzioni:
 - `evaluation.py`: Modulo per la valutazione delle prestazioni
 - `advanced_retrieval.py`: Modulo per tecniche avanzate di retrieval
 - `cache_manager.py`: Modulo per la gestione della cache
-
-## Esempio di Utilizzo
-
-1. Indicizza i tuoi documenti PDF:
-   ```
-   python cli.py index --pdf_dir "C:\Documenti\Manuali" --index_type faiss
-   ```
-
-2. Avvia la modalità interattiva:
-   ```
-   python cli.py interactive --use_cache --show_docs
-   ```
-
-3. Poni domande sui tuoi documenti:
-   ```
-   Inserisci la tua domanda: Quali sono le procedure di sicurezza descritte nei manuali?
-   ```
+- `streamlit_app/`: Directory contenente l'interfaccia grafica Streamlit
+  - `app.py`: File principale dell'applicazione Streamlit
+  - `sidebar.py`: Componente per la gestione dei documenti e delle impostazioni
+  - `chat_interface.py`: Componente per l'interazione con l'utente
+  - `utils.py`: Funzioni di utilità per l'applicazione Streamlit
 
 ## Consigli per le Prestazioni
 
