@@ -35,6 +35,13 @@ Questo sistema utilizza tecniche di RAG (Retrieval Augmented Generation) per ana
    echo "OPENAI_API_KEY=your_api_key_here" > .env
    ```
 
+4. Crea le cartelle necessarie:
+   ```
+   # Crea le cartelle per i documenti e il database vettoriale
+   mkdir documents
+   mkdir vector_db
+   ```
+
 ## Utilizzo
 
 ### Interfaccia Grafica Streamlit
