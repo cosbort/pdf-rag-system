@@ -47,8 +47,16 @@ class VectorStoreManager:
         if not documents:
             raise ValueError("Nessun documento fornito per la creazione dell'indice.")
         
-        # Crea l'indice FAISS
-        self.vector_store = FAISS.from_documents(documents, self.embeddings)
+        # Stampa informazioni sui documenti per debug
+        print(f"Creazione indice FAISS per {len(documents)} documenti")
+        
+        # Crea l'indice FAISS con batch processing per migliorare le prestazioni
+        # Utilizziamo batch_size per limitare il numero di chiamate API simultanee
+        self.vector_store = FAISS.from_documents(
+            documents, 
+            self.embeddings,
+            batch_size=50  # Processa 50 documenti alla volta
+        )
         
         # Salva l'indice se è specificato un percorso
         if save_path:

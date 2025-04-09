@@ -36,7 +36,13 @@ def run_indexing_process():
         # Carica i documenti PDF
         with st.session_state.get("indexing_status_placeholder"):
             st.write("Caricamento dei documenti PDF...")
+            start_time = time.time()
+        
         documents = pdf_processor.load_documents()
+        
+        with st.session_state.get("indexing_status_placeholder"):
+            loading_time = time.time() - start_time
+            st.write(f"Caricamento completato in {loading_time:.2f} secondi.")
         
         if not documents:
             with st.session_state.get("indexing_status_placeholder"):
@@ -47,15 +53,25 @@ def run_indexing_process():
         # Dividi i documenti in chunks
         with st.session_state.get("indexing_status_placeholder"):
             st.write(f"Divisione dei documenti in chunks (dimensione: {settings['chunk_size']}, sovrapposizione: {settings['chunk_overlap']})...")
+            start_time = time.time()
+        
         chunks = pdf_processor.split_documents(
             chunk_size=settings['chunk_size'],
             chunk_overlap=settings['chunk_overlap']
         )
         
+        with st.session_state.get("indexing_status_placeholder"):
+            chunking_time = time.time() - start_time
+            st.write(f"Divisione in chunks completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks.")
+        
         # Inizializza il gestore del database vettoriale
         # Utilizziamo solo FAISS per semplicità
         with st.session_state.get("indexing_status_placeholder"):
-            st.write("Creazione dell'indice FAISS...")
+            st.write("Creazione dell'indice FAISS (generazione degli embedding e indicizzazione)...")
+            st.write("Questa operazione può richiedere tempo, specialmente per documenti grandi.")
+            st.write("La maggior parte del tempo è spesa nella chiamata all'API OpenAI per generare gli embedding.")
+            start_time = time.time()
+        
         vector_store_manager = VectorStoreManager()
         # Crea l'indice FAISS
         vector_store = vector_store_manager.create_faiss_index(
@@ -63,14 +79,23 @@ def run_indexing_process():
             save_path=vector_db_dir
         )
         
+        with st.session_state.get("indexing_status_placeholder"):
+            indexing_time = time.time() - start_time
+            st.write(f"Creazione dell'indice FAISS completata in {indexing_time:.2f} secondi.")
+        
         # Salva le impostazioni
         save_retriever_settings()
         
         # Aggiorna lo stato dell'indice
         st.session_state.index_status = True
         
+        # Calcola il tempo totale
+        total_time = loading_time + chunking_time + indexing_time
+        
         with st.session_state.get("indexing_status_placeholder"):
-            st.success(f"Indicizzazione completata con successo! {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
+            st.success(f"Indicizzazione completata con successo in {total_time:.2f} secondi!")
+            st.write(f"Dettagli: {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
+            st.write(f"Tempo di caricamento: {loading_time:.2f}s | Tempo di chunking: {chunking_time:.2f}s | Tempo di embedding/indicizzazione: {indexing_time:.2f}s")
         
     except Exception as e:
         with st.session_state.get("indexing_status_placeholder"):
