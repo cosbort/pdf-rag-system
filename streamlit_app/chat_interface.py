@@ -105,7 +105,7 @@ def display_chat_interface():
         st.image(
             "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
             caption="Sistema RAG per l'analisi di documenti PDF",
-            use_column_width=True
+            use_container_width=True
         )
         
         # Visualizza la cronologia dei messaggi
