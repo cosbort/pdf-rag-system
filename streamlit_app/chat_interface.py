@@ -56,37 +56,45 @@ def process_query(question):
         
         # Inizializza il gestore del database vettoriale - usiamo solo FAISS
         vector_store_manager = VectorStoreManager()
-        # Carica l'indice FAISS
-        vector_store = vector_store_manager.load_faiss_index(vector_db_dir)
         
-        # Ottieni il retriever
-        base_retriever = vector_store_manager.get_retriever(k=settings['k'])
-        
-        # Utilizza il retriever multi-query se richiesto
-        if settings['use_multi_query']:
-            query_transformer = QueryTransformer()
-            multi_query_retriever = MultiQueryRetriever(base_retriever, query_transformer)
-            retriever = multi_query_retriever
-            retrieved_docs = multi_query_retriever.get_relevant_documents(question)
-        else:
-            retriever = base_retriever
-            retrieved_docs = base_retriever.get_relevant_documents(question)
-        
-        # Inizializza il generatore RAG
-        rag_generator = RAGGenerator(llm_model=st.session_state.model)
-        
-        # Genera la risposta
-        answer = rag_generator.answer_question(retriever, question)
-        
-        # Salva nella cache
-        cache.save_to_cache(question, retrieved_docs, answer)
-        
-        return {
-            "answer": answer,
-            "documents": retrieved_docs,
-            "from_cache": False,
-            "error": False
-        }
+        try:
+            # Carica l'indice FAISS
+            vector_store = vector_store_manager.load_faiss_index(vector_db_dir)
+            
+            # Ottieni il retriever
+            base_retriever = vector_store_manager.get_retriever(k=settings['k'])
+            
+            # Utilizza il retriever multi-query se richiesto
+            if settings['use_multi_query']:
+                query_transformer = QueryTransformer()
+                multi_query_retriever = MultiQueryRetriever(base_retriever, query_transformer)
+                retriever = multi_query_retriever
+                retrieved_docs = multi_query_retriever.get_relevant_documents(question)
+            else:
+                retriever = base_retriever
+                retrieved_docs = base_retriever.get_relevant_documents(question)
+            
+            # Inizializza il generatore RAG
+            rag_generator = RAGGenerator(llm_model=st.session_state.model)
+            
+            # Genera la risposta
+            answer = rag_generator.answer_question(retriever, question)
+            
+            # Salva nella cache
+            cache.save_to_cache(question, retrieved_docs, answer)
+            
+            return {
+                "answer": answer,
+                "documents": retrieved_docs,
+                "from_cache": False,
+                "error": False
+            }
+        except Exception as e:
+            return {
+                "answer": f"Si è verificato un errore durante l'elaborazione della domanda: {str(e)}",
+                "documents": [],
+                "error": True
+            }
     
     except Exception as e:
         return {

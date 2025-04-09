@@ -109,9 +109,18 @@ class VectorStoreManager:
         Returns:
             Istanza di FAISS
         """
-        self.vector_store = FAISS.load_local(load_path, self.embeddings)
-        print(f"Indice FAISS caricato da {load_path}")
-        return self.vector_store
+        print(f"DEBUG: Caricamento indice FAISS da {load_path}")
+        try:
+            self.vector_store = FAISS.load_local(
+                load_path, 
+                self.embeddings,
+                allow_dangerous_deserialization=True  # Consentiamo la deserializzazione sicura
+            )
+            print(f"DEBUG: Indice FAISS caricato con successo da {load_path}")
+            return self.vector_store
+        except Exception as e:
+            print(f"DEBUG: Errore durante il caricamento dell'indice FAISS: {str(e)}")
+            raise e
     
     def load_chroma_db(self) -> Chroma:
         """
