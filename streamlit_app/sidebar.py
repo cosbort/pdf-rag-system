@@ -22,7 +22,7 @@ from streamlit_app.utils import (
     check_index_status
 )
 
-def run_indexing_process():
+def run_indexing_process(status_placeholder):
     """Esegue il processo di indicizzazione in background."""
     try:
         # Ottieni i parametri dalla sessione
@@ -30,47 +30,42 @@ def run_indexing_process():
         vector_db_dir = st.session_state.vector_db_dir
         settings = st.session_state.retriever_settings
         
+        # Crea un placeholder temporaneo per gli aggiornamenti
+        #status_placeholder = st.empty()
+        
         # Inizializza il processore PDF
+        status_placeholder.write("Caricamento dei documenti PDF...")
+        start_time = time.time()
+        
         pdf_processor = PDFProcessor(pdf_dir)
-        
-        # Carica i documenti PDF
-        with st.session_state.get("indexing_status_placeholder"):
-            st.write("Caricamento dei documenti PDF...")
-            start_time = time.time()
-        
         documents = pdf_processor.load_documents()
         
-        with st.session_state.get("indexing_status_placeholder"):
-            loading_time = time.time() - start_time
-            st.write(f"Caricamento completato in {loading_time:.2f} secondi.")
+        loading_time = time.time() - start_time
+        status_placeholder.write(f"Caricamento completato in {loading_time:.2f} secondi.")
         
         if not documents:
-            with st.session_state.get("indexing_status_placeholder"):
-                st.error("Nessun documento PDF trovato nella directory specificata.")
+            status_placeholder.error("Nessun documento PDF trovato nella directory specificata.")
             st.session_state.indexing_in_progress = False
             return
         
         # Dividi i documenti in chunks
-        with st.session_state.get("indexing_status_placeholder"):
-            st.write(f"Divisione dei documenti in chunks (dimensione: {settings['chunk_size']}, sovrapposizione: {settings['chunk_overlap']})...")
-            start_time = time.time()
+        status_placeholder.write(f"Divisione dei documenti in chunks (dimensione: {settings['chunk_size']}, sovrapposizione: {settings['chunk_overlap']})...")
+        start_time = time.time()
         
         chunks = pdf_processor.split_documents(
             chunk_size=settings['chunk_size'],
             chunk_overlap=settings['chunk_overlap']
         )
         
-        with st.session_state.get("indexing_status_placeholder"):
-            chunking_time = time.time() - start_time
-            st.write(f"Divisione in chunks completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks.")
+        chunking_time = time.time() - start_time
+        status_placeholder.write(f"Divisione in chunks completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks.")
         
         # Inizializza il gestore del database vettoriale
         # Utilizziamo solo FAISS per semplicità
-        with st.session_state.get("indexing_status_placeholder"):
-            st.write("Creazione dell'indice FAISS (generazione degli embedding e indicizzazione)...")
-            st.write("Questa operazione può richiedere tempo, specialmente per documenti grandi.")
-            st.write("La maggior parte del tempo è spesa nella chiamata all'API OpenAI per generare gli embedding.")
-            start_time = time.time()
+        status_placeholder.write("Creazione dell'indice FAISS (generazione degli embedding e indicizzazione)...")
+        status_placeholder.write("Questa operazione può richiedere tempo, specialmente per documenti grandi.")
+        status_placeholder.write("La maggior parte del tempo è spesa nella chiamata all'API OpenAI per generare gli embedding.")
+        start_time = time.time()
         
         vector_store_manager = VectorStoreManager()
         # Crea l'indice FAISS
@@ -79,9 +74,8 @@ def run_indexing_process():
             save_path=vector_db_dir
         )
         
-        with st.session_state.get("indexing_status_placeholder"):
-            indexing_time = time.time() - start_time
-            st.write(f"Creazione dell'indice FAISS completata in {indexing_time:.2f} secondi.")
+        indexing_time = time.time() - start_time
+        status_placeholder.write(f"Creazione dell'indice FAISS completata in {indexing_time:.2f} secondi.")
         
         # Salva le impostazioni
         save_retriever_settings()
@@ -92,14 +86,12 @@ def run_indexing_process():
         # Calcola il tempo totale
         total_time = loading_time + chunking_time + indexing_time
         
-        with st.session_state.get("indexing_status_placeholder"):
-            st.success(f"Indicizzazione completata con successo in {total_time:.2f} secondi!")
-            st.write(f"Dettagli: {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
-            st.write(f"Tempo di caricamento: {loading_time:.2f}s | Tempo di chunking: {chunking_time:.2f}s | Tempo di embedding/indicizzazione: {indexing_time:.2f}s")
+        status_placeholder.success(f"Indicizzazione completata con successo in {total_time:.2f} secondi!")
+        status_placeholder.write(f"Dettagli: {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
+        status_placeholder.write(f"Tempo di caricamento: {loading_time:.2f}s | Tempo di chunking: {chunking_time:.2f}s | Tempo di embedding/indicizzazione: {indexing_time:.2f}s")
         
     except Exception as e:
-        with st.session_state.get("indexing_status_placeholder"):
-            st.error(f"Errore durante l'indicizzazione: {str(e)}")
+        st.error(f"Errore durante l'indicizzazione: {str(e)}")
     
     finally:
         # Imposta lo stato di indicizzazione come completato
@@ -249,16 +241,11 @@ def display_sidebar():
         if "indexing_in_progress" not in st.session_state:
             st.session_state.indexing_in_progress = False
         
-        # Placeholder per lo stato dell'indicizzazione
-        if "indexing_status_placeholder" not in st.session_state:
-            st.session_state.indexing_status_placeholder = st.empty()
+        # Crea un container per visualizzare lo stato dell'indicizzazione
+        indexing_status_container = st.container()
         
         if st.session_state.indexing_in_progress:
             st.info("Indicizzazione in corso...")
-            
-            # Mostra lo stato dell'indicizzazione nel placeholder
-            with st.session_state.indexing_status_placeholder:
-                st.write("In attesa di aggiornamenti...")
         else:
             if st.button("🔍 Indicizza documenti"):
                 if not documents:
@@ -267,7 +254,7 @@ def display_sidebar():
                     st.session_state.indexing_in_progress = True
                     
                     # Avvia il processo di indicizzazione in un thread separato
-                    threading.Thread(target=run_indexing_process).start()
+                    threading.Thread(target=lambda: run_indexing_process(indexing_status_container)).start()
                     st.rerun()
         
         # Separatore
