@@ -139,28 +139,23 @@ def load_retriever_settings():
 def get_document_list():
     """Ottiene la lista dei documenti PDF nella directory specificata."""
     pdf_dir = st.session_state.pdf_dir
+    documents = []
     
-    if not os.path.exists(pdf_dir):
-        return []
+    if os.path.exists(pdf_dir):
+        for filename in os.listdir(pdf_dir):
+            if filename.lower().endswith('.pdf'):
+                file_path = os.path.join(pdf_dir, filename)
+                file_stats = os.stat(file_path)
+                
+                documents.append({
+                    'name': filename,
+                    'filename': filename,  # Per retrocompatibilità
+                    'path': file_path,
+                    'size': file_stats.st_size,
+                    'modified': file_stats.st_mtime
+                })
     
-    pdf_files = []
-    for file in os.listdir(pdf_dir):
-        if file.lower().endswith('.pdf'):
-            file_path = os.path.join(pdf_dir, file)
-            file_stats = os.stat(file_path)
-            
-            pdf_files.append({
-                "filename": file,
-                "path": file_path,
-                "size": file_stats.st_size,
-                "modified": file_stats.st_mtime,
-                "id": file  # Usiamo il nome del file come ID
-            })
-    
-    # Ordina per data di modifica (più recente prima)
-    pdf_files.sort(key=lambda x: x["modified"], reverse=True)
-    
-    return pdf_files
+    return documents
 
 def format_file_size(size_bytes):
     """Formatta la dimensione del file in un formato leggibile."""

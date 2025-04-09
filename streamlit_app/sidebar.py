@@ -67,15 +67,15 @@ def display_sidebar():
             st.subheader("Documenti Caricati")
             
             for doc in documents:
-                st.write(f"{doc['name']}")
+                st.write(f"{doc['filename']}")
                 st.write(f"Dimensione: {format_file_size(doc['size'])} | Modificato: {format_timestamp(doc['modified'])}")
                 
                 # Selezione del documento da eliminare
-                if st.button("🗑️ Elimina documento", key=f"delete_{doc['name']}"):
+                if st.button("🗑️ Elimina documento", key=f"delete_{doc['filename']}"):
                     try:
                         # Elimina il file
-                        os.remove(os.path.join(st.session_state.pdf_dir, doc['name']))
-                        st.success(f"Documento {doc['name']} eliminato con successo!")
+                        os.remove(os.path.join(st.session_state.pdf_dir, doc['filename']))
+                        st.success(f"Documento {doc['filename']} eliminato con successo!")
                         
                         # Aggiorna la lista dei documenti
                         st.session_state.documents = get_document_list()
