@@ -51,13 +51,11 @@ class VectorStoreManager:
         print(f"DEBUG FAISS: Creazione indice FAISS per {len(documents)} documenti")
         
         try:
-            # Crea l'indice FAISS con batch processing per migliorare le prestazioni
-            # Utilizziamo batch_size per limitare il numero di chiamate API simultanee
+            # Crea l'indice FAISS
             print("DEBUG FAISS: Inizio generazione embedding")
             self.vector_store = FAISS.from_documents(
                 documents, 
-                self.embeddings,
-                batch_size=50  # Processa 50 documenti alla volta
+                self.embeddings
             )
             print("DEBUG FAISS: Embedding generati con successo")
             
