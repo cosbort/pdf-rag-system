@@ -104,20 +104,8 @@ def display_chat_interface():
         # Aggiungi l'immagine esplicativa del sistema RAG
         st.image(
             "https://www.diariodiunanalista.it/content/images/size/w1600/2023/11/image-16.png",
-            caption="Architettura del sistema RAG",
             use_column_width=True
         )
-        
-        # Aggiungi una breve spiegazione
-        st.markdown("""
-        ### Come funziona il sistema RAG
-        
-        1. **Indicizzazione**: I documenti PDF vengono caricati, suddivisi in chunks e convertiti in embedding vettoriali
-        2. **Retrieval**: Quando fai una domanda, il sistema cerca i chunks più rilevanti
-        3. **Generation**: Il modello LLM genera una risposta basata sui chunks recuperati
-        """)
-        
-        st.markdown("---")
         
         # Visualizza la cronologia dei messaggi
         for message in st.session_state.messages:
