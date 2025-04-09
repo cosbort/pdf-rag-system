@@ -5,7 +5,8 @@
 /cache/
 /vector_db/
 
-# Directory dei documenti PDF
+# Cartella documenti privati
+/documents/
 /docs/
 
 # File di Python
