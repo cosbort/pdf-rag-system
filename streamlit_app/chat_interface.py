@@ -101,9 +101,12 @@ def display_chat_interface():
     chat_container = st.container()
     
     with chat_container:
-        # Aggiungiamo un'icona emoji di un robot invece di un'immagine
-        st.markdown("<h1 style='text-align: center; color: #4B8BBE;'>🤖</h1>", unsafe_allow_html=True)
-        st.markdown("<h3 style='text-align: center; color: #306998;'>Sistema RAG per l'analisi di documenti PDF</h3>", unsafe_allow_html=True)
+        # Aggiungiamo l'immagine da Unsplash
+        st.image(
+            "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
+            caption="Sistema RAG per l'analisi di documenti PDF",
+            use_column_width=True
+        )
         
         # Visualizza la cronologia dei messaggi
         for message in st.session_state.messages:
