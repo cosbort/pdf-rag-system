@@ -7,7 +7,6 @@ import sys
 import time
 from pathlib import Path
 import subprocess
-import threading
 
 # Aggiungi la directory principale al path per importare i moduli
 sys.path.append(str(Path(__file__).parent.parent))
@@ -21,95 +20,6 @@ from streamlit_app.utils import (
     save_retriever_settings,
     check_index_status
 )
-
-def run_indexing_process(status_placeholder):
-    """Esegue il processo di indicizzazione in background."""
-    try:
-        # Ottieni i parametri dalla sessione
-        pdf_dir = st.session_state.pdf_dir
-        vector_db_dir = st.session_state.vector_db_dir
-        settings = st.session_state.retriever_settings
-        
-        # Log iniziale
-        print("DEBUG: Avvio processo di indicizzazione")
-        status_placeholder.write("Avvio processo di indicizzazione...")
-        
-        # Inizializza il processore PDF
-        print("DEBUG: Inizializzazione processore PDF")
-        status_placeholder.write("Caricamento dei documenti PDF...")
-        start_time = time.time()
-        
-        pdf_processor = PDFProcessor(pdf_dir)
-        print(f"DEBUG: Caricamento documenti da {pdf_dir}")
-        documents = pdf_processor.load_documents()
-        
-        loading_time = time.time() - start_time
-        print(f"DEBUG: Caricamento completato in {loading_time:.2f} secondi. Trovati {len(documents)} documenti")
-        status_placeholder.write(f"Caricamento completato in {loading_time:.2f} secondi. Trovati {len(documents)} documenti")
-        
-        if not documents:
-            print("DEBUG: Nessun documento trovato")
-            status_placeholder.error("Nessun documento PDF trovato nella directory specificata.")
-            st.session_state.indexing_in_progress = False
-            return
-        
-        # Dividi i documenti in chunks
-        print("DEBUG: Inizio divisione in chunks")
-        status_placeholder.write(f"Divisione dei documenti in chunks (dimensione: {settings['chunk_size']}, sovrapposizione: {settings['chunk_overlap']})...")
-        start_time = time.time()
-        
-        chunks = pdf_processor.split_documents(
-            chunk_size=settings['chunk_size'],
-            chunk_overlap=settings['chunk_overlap']
-        )
-        
-        chunking_time = time.time() - start_time
-        print(f"DEBUG: Divisione completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks")
-        status_placeholder.write(f"Divisione in chunks completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks.")
-        
-        # Inizializza il gestore del database vettoriale
-        # Utilizziamo solo FAISS per semplicità
-        print("DEBUG: Inizio creazione indice FAISS")
-        status_placeholder.write("Creazione dell'indice FAISS (generazione degli embedding e indicizzazione)...")
-        status_placeholder.write("Questa operazione può richiedere tempo, specialmente per documenti grandi.")
-        status_placeholder.write("La maggior parte del tempo è spesa nella chiamata all'API OpenAI per generare gli embedding.")
-        start_time = time.time()
-        
-        vector_store_manager = VectorStoreManager()
-        # Crea l'indice FAISS
-        print("DEBUG: Chiamata a create_faiss_index")
-        vector_store = vector_store_manager.create_faiss_index(
-            chunks, 
-            save_path=vector_db_dir
-        )
-        
-        indexing_time = time.time() - start_time
-        print(f"DEBUG: Creazione indice completata in {indexing_time:.2f} secondi")
-        status_placeholder.write(f"Creazione dell'indice FAISS completata in {indexing_time:.2f} secondi.")
-        
-        # Salva le impostazioni
-        print("DEBUG: Salvataggio impostazioni")
-        save_retriever_settings()
-        
-        # Aggiorna lo stato dell'indice
-        st.session_state.index_status = True
-        
-        # Calcola il tempo totale
-        total_time = loading_time + chunking_time + indexing_time
-        
-        print(f"DEBUG: Indicizzazione completata in {total_time:.2f} secondi")
-        status_placeholder.success(f"Indicizzazione completata con successo in {total_time:.2f} secondi!")
-        status_placeholder.write(f"Dettagli: {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
-        status_placeholder.write(f"Tempo di caricamento: {loading_time:.2f}s | Tempo di chunking: {chunking_time:.2f}s | Tempo di embedding/indicizzazione: {indexing_time:.2f}s")
-        
-    except Exception as e:
-        print(f"DEBUG: ERRORE durante l'indicizzazione: {str(e)}")
-        status_placeholder.error(f"Errore durante l'indicizzazione: {str(e)}")
-    
-    finally:
-        print("DEBUG: Processo di indicizzazione terminato")
-        # Imposta lo stato di indicizzazione come completato
-        st.session_state.indexing_in_progress = False
 
 def display_sidebar():
     """Visualizza la sidebar dell'applicazione."""
@@ -142,7 +52,7 @@ def display_sidebar():
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             
-            st.success(f"File '{uploaded_file.name}' caricato con successo!")
+            st.success(f"File {uploaded_file.name} caricato con successo!")
             
             # Aggiorna la lista dei documenti
             st.session_state.documents = get_document_list()
@@ -150,51 +60,31 @@ def display_sidebar():
             # Resetta lo stato dell'indice
             st.session_state.index_status = check_index_status()
         
-        # Visualizza la lista dei documenti
-        st.subheader("📚 Documenti Caricati")
+        # Lista dei documenti caricati
+        documents = st.session_state.documents
         
-        # Pulsante per aggiornare la lista
-        if st.button("🔄 Aggiorna lista"):
-            st.session_state.documents = get_document_list()
-        
-        # Ottieni la lista dei documenti
-        documents = get_document_list()
-        st.session_state.documents = documents
-        
-        if not documents:
-            st.info("Nessun documento caricato. Carica un documento PDF per iniziare.")
-        else:
-            for doc in documents:
-                with st.container():
-                    st.markdown(f"**{doc['filename']}**")
-                    st.caption(f"Dimensione: {format_file_size(doc['size'])} | Modificato: {format_timestamp(doc['modified'])}")
+        if documents:
+            st.subheader("Documenti Caricati")
             
-            # Selezione documento da eliminare
-            if len(documents) > 0:
-                selected_doc = st.selectbox(
-                    "Seleziona un documento da eliminare:",
-                    options=[doc['filename'] for doc in documents],
-                    key="doc_to_delete"
-                )
+            for doc in documents:
+                st.write(f"{doc['name']}")
+                st.write(f"Dimensione: {format_file_size(doc['size'])} | Modificato: {format_timestamp(doc['modified'])}")
                 
-                if st.button("🗑️ Elimina documento"):
-                    # Trova il documento selezionato
-                    doc_to_delete = next((doc for doc in documents if doc['filename'] == selected_doc), None)
-                    
-                    if doc_to_delete:
+                # Selezione del documento da eliminare
+                if st.button("🗑️ Elimina documento", key=f"delete_{doc['name']}"):
+                    try:
                         # Elimina il file
-                        try:
-                            os.remove(doc_to_delete['path'])
-                            st.success(f"Documento '{doc_to_delete['filename']}' eliminato con successo!")
-                            
-                            # Aggiorna la lista dei documenti
-                            st.session_state.documents = get_document_list()
-                            
-                            # Resetta lo stato dell'indice
-                            st.session_state.index_status = check_index_status()
-                            
-                        except Exception as e:
-                            st.error(f"Errore durante l'eliminazione del documento: {str(e)}")
+                        os.remove(os.path.join(st.session_state.pdf_dir, doc['name']))
+                        st.success(f"Documento {doc['name']} eliminato con successo!")
+                        
+                        # Aggiorna la lista dei documenti
+                        st.session_state.documents = get_document_list()
+                        
+                        # Resetta lo stato dell'indice
+                        st.session_state.index_status = check_index_status()
+                        
+                    except Exception as e:
+                        st.error(f"Errore durante l'eliminazione del documento: {str(e)}")
         
         # Separatore
         st.markdown("---")
@@ -251,25 +141,95 @@ def display_sidebar():
         else:
             st.warning("⚠️ Indice non creato")
         
-        # Pulsante per indicizzare i documenti
-        if "indexing_in_progress" not in st.session_state:
-            st.session_state.indexing_in_progress = False
-        
         # Crea un container per visualizzare lo stato dell'indicizzazione
-        indexing_status_container = st.container()
+        indexing_status_container = st.empty()
         
-        if st.session_state.indexing_in_progress:
-            st.info("Indicizzazione in corso...")
-        else:
-            if st.button("🔍 Indicizza documenti"):
-                if not documents:
-                    st.error("Nessun documento da indicizzare. Carica almeno un documento PDF.")
-                else:
-                    st.session_state.indexing_in_progress = True
+        # Pulsante per indicizzare i documenti
+        if st.button("🔍 Indicizza documenti"):
+            if not documents:
+                st.error("Nessun documento da indicizzare. Carica almeno un documento PDF.")
+            else:
+                # Esegui il processo di indicizzazione direttamente (senza thread)
+                try:
+                    # Ottieni i parametri dalla sessione
+                    pdf_dir = st.session_state.pdf_dir
+                    vector_db_dir = st.session_state.vector_db_dir
+                    settings = st.session_state.retriever_settings
                     
-                    # Avvia il processo di indicizzazione in un thread separato
-                    threading.Thread(target=lambda: run_indexing_process(indexing_status_container)).start()
-                    st.rerun()
+                    # Log iniziale
+                    print("DEBUG: Avvio processo di indicizzazione")
+                    indexing_status_container.info("Avvio processo di indicizzazione...")
+                    
+                    # Inizializza il processore PDF
+                    print("DEBUG: Inizializzazione processore PDF")
+                    indexing_status_container.info("Caricamento dei documenti PDF...")
+                    start_time = time.time()
+                    
+                    pdf_processor = PDFProcessor(pdf_dir)
+                    print(f"DEBUG: Caricamento documenti da {pdf_dir}")
+                    documents = pdf_processor.load_documents()
+                    
+                    loading_time = time.time() - start_time
+                    print(f"DEBUG: Caricamento completato in {loading_time:.2f} secondi. Trovati {len(documents)} documenti")
+                    indexing_status_container.info(f"Caricamento completato in {loading_time:.2f} secondi. Trovati {len(documents)} documenti")
+                    
+                    if not documents:
+                        print("DEBUG: Nessun documento trovato")
+                        indexing_status_container.error("Nessun documento PDF trovato nella directory specificata.")
+                        return
+                    
+                    # Dividi i documenti in chunks
+                    print("DEBUG: Inizio divisione in chunks")
+                    indexing_status_container.info(f"Divisione dei documenti in chunks (dimensione: {settings['chunk_size']}, sovrapposizione: {settings['chunk_overlap']})...")
+                    start_time = time.time()
+                    
+                    chunks = pdf_processor.split_documents(
+                        chunk_size=settings['chunk_size'],
+                        chunk_overlap=settings['chunk_overlap']
+                    )
+                    
+                    chunking_time = time.time() - start_time
+                    print(f"DEBUG: Divisione completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks")
+                    indexing_status_container.info(f"Divisione in chunks completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks.")
+                    
+                    # Inizializza il gestore del database vettoriale
+                    # Utilizziamo solo FAISS per semplicità
+                    print("DEBUG: Inizio creazione indice FAISS")
+                    indexing_status_container.info("Creazione dell'indice FAISS (generazione degli embedding e indicizzazione)...")
+                    indexing_status_container.info("Questa operazione può richiedere tempo, specialmente per documenti grandi.")
+                    indexing_status_container.info("La maggior parte del tempo è spesa nella chiamata all'API OpenAI per generare gli embedding.")
+                    start_time = time.time()
+                    
+                    vector_store_manager = VectorStoreManager()
+                    # Crea l'indice FAISS
+                    print("DEBUG: Chiamata a create_faiss_index")
+                    vector_store = vector_store_manager.create_faiss_index(
+                        chunks, 
+                        save_path=vector_db_dir
+                    )
+                    
+                    indexing_time = time.time() - start_time
+                    print(f"DEBUG: Creazione indice completata in {indexing_time:.2f} secondi")
+                    indexing_status_container.info(f"Creazione dell'indice FAISS completata in {indexing_time:.2f} secondi.")
+                    
+                    # Salva le impostazioni
+                    print("DEBUG: Salvataggio impostazioni")
+                    save_retriever_settings()
+                    
+                    # Aggiorna lo stato dell'indice
+                    st.session_state.index_status = True
+                    
+                    # Calcola il tempo totale
+                    total_time = loading_time + chunking_time + indexing_time
+                    
+                    print(f"DEBUG: Indicizzazione completata in {total_time:.2f} secondi")
+                    indexing_status_container.success(f"Indicizzazione completata con successo in {total_time:.2f} secondi!")
+                    indexing_status_container.info(f"Dettagli: {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
+                    indexing_status_container.info(f"Tempo di caricamento: {loading_time:.2f}s | Tempo di chunking: {chunking_time:.2f}s | Tempo di embedding/indicizzazione: {indexing_time:.2f}s")
+                    
+                except Exception as e:
+                    print(f"DEBUG: ERRORE durante l'indicizzazione: {str(e)}")
+                    indexing_status_container.error(f"Errore durante l'indicizzazione: {str(e)}")
         
         # Separatore
         st.markdown("---")
