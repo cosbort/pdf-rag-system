@@ -30,25 +30,31 @@ def run_indexing_process(status_placeholder):
         vector_db_dir = st.session_state.vector_db_dir
         settings = st.session_state.retriever_settings
         
-        # Crea un placeholder temporaneo per gli aggiornamenti
-        #status_placeholder = st.empty()
+        # Log iniziale
+        print("DEBUG: Avvio processo di indicizzazione")
+        status_placeholder.write("Avvio processo di indicizzazione...")
         
         # Inizializza il processore PDF
+        print("DEBUG: Inizializzazione processore PDF")
         status_placeholder.write("Caricamento dei documenti PDF...")
         start_time = time.time()
         
         pdf_processor = PDFProcessor(pdf_dir)
+        print(f"DEBUG: Caricamento documenti da {pdf_dir}")
         documents = pdf_processor.load_documents()
         
         loading_time = time.time() - start_time
-        status_placeholder.write(f"Caricamento completato in {loading_time:.2f} secondi.")
+        print(f"DEBUG: Caricamento completato in {loading_time:.2f} secondi. Trovati {len(documents)} documenti")
+        status_placeholder.write(f"Caricamento completato in {loading_time:.2f} secondi. Trovati {len(documents)} documenti")
         
         if not documents:
+            print("DEBUG: Nessun documento trovato")
             status_placeholder.error("Nessun documento PDF trovato nella directory specificata.")
             st.session_state.indexing_in_progress = False
             return
         
         # Dividi i documenti in chunks
+        print("DEBUG: Inizio divisione in chunks")
         status_placeholder.write(f"Divisione dei documenti in chunks (dimensione: {settings['chunk_size']}, sovrapposizione: {settings['chunk_overlap']})...")
         start_time = time.time()
         
@@ -58,10 +64,12 @@ def run_indexing_process(status_placeholder):
         )
         
         chunking_time = time.time() - start_time
+        print(f"DEBUG: Divisione completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks")
         status_placeholder.write(f"Divisione in chunks completata in {chunking_time:.2f} secondi. Generati {len(chunks)} chunks.")
         
         # Inizializza il gestore del database vettoriale
         # Utilizziamo solo FAISS per semplicità
+        print("DEBUG: Inizio creazione indice FAISS")
         status_placeholder.write("Creazione dell'indice FAISS (generazione degli embedding e indicizzazione)...")
         status_placeholder.write("Questa operazione può richiedere tempo, specialmente per documenti grandi.")
         status_placeholder.write("La maggior parte del tempo è spesa nella chiamata all'API OpenAI per generare gli embedding.")
@@ -69,15 +77,18 @@ def run_indexing_process(status_placeholder):
         
         vector_store_manager = VectorStoreManager()
         # Crea l'indice FAISS
+        print("DEBUG: Chiamata a create_faiss_index")
         vector_store = vector_store_manager.create_faiss_index(
             chunks, 
             save_path=vector_db_dir
         )
         
         indexing_time = time.time() - start_time
+        print(f"DEBUG: Creazione indice completata in {indexing_time:.2f} secondi")
         status_placeholder.write(f"Creazione dell'indice FAISS completata in {indexing_time:.2f} secondi.")
         
         # Salva le impostazioni
+        print("DEBUG: Salvataggio impostazioni")
         save_retriever_settings()
         
         # Aggiorna lo stato dell'indice
@@ -86,14 +97,17 @@ def run_indexing_process(status_placeholder):
         # Calcola il tempo totale
         total_time = loading_time + chunking_time + indexing_time
         
+        print(f"DEBUG: Indicizzazione completata in {total_time:.2f} secondi")
         status_placeholder.success(f"Indicizzazione completata con successo in {total_time:.2f} secondi!")
         status_placeholder.write(f"Dettagli: {len(documents)} documenti indicizzati in {len(chunks)} chunks.")
         status_placeholder.write(f"Tempo di caricamento: {loading_time:.2f}s | Tempo di chunking: {chunking_time:.2f}s | Tempo di embedding/indicizzazione: {indexing_time:.2f}s")
         
     except Exception as e:
-        st.error(f"Errore durante l'indicizzazione: {str(e)}")
+        print(f"DEBUG: ERRORE durante l'indicizzazione: {str(e)}")
+        status_placeholder.error(f"Errore durante l'indicizzazione: {str(e)}")
     
     finally:
+        print("DEBUG: Processo di indicizzazione terminato")
         # Imposta lo stato di indicizzazione come completato
         st.session_state.indexing_in_progress = False
 

@@ -48,22 +48,29 @@ class VectorStoreManager:
             raise ValueError("Nessun documento fornito per la creazione dell'indice.")
         
         # Stampa informazioni sui documenti per debug
-        print(f"Creazione indice FAISS per {len(documents)} documenti")
+        print(f"DEBUG FAISS: Creazione indice FAISS per {len(documents)} documenti")
         
-        # Crea l'indice FAISS con batch processing per migliorare le prestazioni
-        # Utilizziamo batch_size per limitare il numero di chiamate API simultanee
-        self.vector_store = FAISS.from_documents(
-            documents, 
-            self.embeddings,
-            batch_size=50  # Processa 50 documenti alla volta
-        )
-        
-        # Salva l'indice se è specificato un percorso
-        if save_path:
-            self.vector_store.save_local(save_path)
-            print(f"Indice FAISS salvato in {save_path}")
+        try:
+            # Crea l'indice FAISS con batch processing per migliorare le prestazioni
+            # Utilizziamo batch_size per limitare il numero di chiamate API simultanee
+            print("DEBUG FAISS: Inizio generazione embedding")
+            self.vector_store = FAISS.from_documents(
+                documents, 
+                self.embeddings,
+                batch_size=50  # Processa 50 documenti alla volta
+            )
+            print("DEBUG FAISS: Embedding generati con successo")
             
-        return self.vector_store
+            # Salva l'indice se è specificato un percorso
+            if save_path:
+                print(f"DEBUG FAISS: Salvataggio indice in {save_path}")
+                self.vector_store.save_local(save_path)
+                print(f"DEBUG FAISS: Indice FAISS salvato in {save_path}")
+                
+            return self.vector_store
+        except Exception as e:
+            print(f"DEBUG FAISS: ERRORE durante la creazione dell'indice: {str(e)}")
+            raise e
     
     def create_chroma_db(self, documents: List[Document]) -> Chroma:
         """
