@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "pdf-rag-system"
+version = "0.1.0"
+description = "Sistema avanzato di Retrieval Augmented Generation per l'analisi di documenti PDF"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+langchain = "^0.1.8"
+langchain-community = "^0.0.21"
+langchain-core = "^0.1.24"
+langchain-text-splitters = "^0.0.1"
+langchain-openai = "^0.0.5"
+pypdf = "^4.0.1"
+faiss-cpu = "^1.7.4"
+python-dotenv = "^1.0.1"
+tiktoken = "^0.5.2"
+pydantic = "^2.6.1"
+streamlit = "^1.32.0"
+watchdog = "^3.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+black = "^23.7.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+app = "streamlit_app.app:main"
+cli = "cli:main"

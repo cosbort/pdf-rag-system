@@ -1,12 +1,12 @@
 """
 Componente sidebar per l'applicazione Streamlit.
 """
-import streamlit as st
 import os
 import sys
 import time
 from pathlib import Path
-import subprocess
+
+import streamlit as st
 
 # Aggiungi la directory principale al path per importare i moduli
 sys.path.append(str(Path(__file__).parent.parent))

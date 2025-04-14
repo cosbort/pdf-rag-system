@@ -1,11 +1,10 @@
 """
 Applicazione Streamlit per il sistema RAG di analisi di documenti PDF.
 """
-import streamlit as st
-import os
 import sys
-import time
 from pathlib import Path
+
+import streamlit as st
 
 # Aggiungi la directory principale al path per importare i moduli
 sys.path.append(str(Path(__file__).parent.parent))

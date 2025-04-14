@@ -26,7 +26,11 @@ Questo sistema utilizza tecniche di RAG (Retrieval Augmented Generation) per ana
 
 2. Installa le dipendenze:
    ```
+   # Usando pip
    pip install -r requirements.txt
+   
+   # Oppure usando Poetry (consigliato)
+   poetry install
    ```
 
 3. Configura la tua chiave API OpenAI:
@@ -49,13 +53,18 @@ Questo sistema utilizza tecniche di RAG (Retrieval Augmented Generation) per ana
 Per avviare l'interfaccia grafica Streamlit:
 
 ```
+# Usando Python direttamente
 python run_streamlit_app.py
 ```
 
 oppure:
 
 ```
+# Usando Python direttamente
 streamlit run streamlit_app/app.py
+
+# Usando Poetry (consigliato)
+poetry run streamlit run streamlit_app/app.py
 ```
 
 L'interfaccia Streamlit ti permetterà di:
@@ -72,7 +81,11 @@ L'interfaccia Streamlit ti permetterà di:
 Per indicizzare i tuoi documenti PDF:
 
 ```
+# Usando Python direttamente
 python cli.py index --pdf_dir "C:\Documenti\Manuali" --index_type faiss
+
+# Usando Poetry (consigliato)
+poetry run python cli.py index --pdf_dir "C:\Documenti\Manuali" --index_type faiss
 ```
 
 Opzioni:
@@ -87,7 +100,11 @@ Opzioni:
 Per avviare la modalità interattiva:
 
 ```
+# Usando Python direttamente
 python cli.py interactive --index_type faiss --persist_dir "./vector_db"
+
+# Usando Poetry (consigliato)
+poetry run python cli.py interactive --index_type faiss --persist_dir "./vector_db"
 ```
 
 Opzioni:
@@ -103,8 +120,13 @@ Opzioni:
 Per gestire la cache:
 
 ```
+# Usando Python direttamente
 python cli.py cache --stats
 python cli.py cache --clear
+
+# Usando Poetry (consigliato)
+poetry run python cli.py cache --stats
+poetry run python cli.py cache --clear
 ```
 
 Opzioni:
@@ -139,7 +161,7 @@ Opzioni:
 
 - Python 3.8+
 - OpenAI API Key
-- Dipendenze elencate in `requirements.txt`
+- Dipendenze gestite tramite Poetry o elencate in `requirements.txt`
 
 ## Licenza
 

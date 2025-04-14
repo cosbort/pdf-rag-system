@@ -34,6 +34,8 @@ var/
 # Ambiente virtuale
 venv/
 ENV/
+.venv/
+poetry.lock
 
 # IDE e editor
 .idea/
