@@ -2,7 +2,7 @@
 name = "pdf-rag-system"
 version = "0.1.0"
 description = "Sistema avanzato di Retrieval Augmented Generation per l'analisi di documenti PDF"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Cosimo Eugenio Bortone <mbortone@gmail.com"]
 license = "MIT"
 readme = "README.md"
 
