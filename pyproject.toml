@@ -3,32 +3,26 @@ name = "pdf-rag-system"
 version = "0.1.0"
 description = "Sistema avanzato di Retrieval Augmented Generation per l'analisi di documenti PDF"
 authors = ["Your Name <your.email@example.com>"]
-readme = "README.md"
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-langchain = "^0.1.8"
-langchain-community = "^0.0.21"
-langchain-core = "^0.1.24"
-langchain-text-splitters = "^0.0.1"
-langchain-openai = "^0.0.5"
-pypdf = "^4.0.1"
-faiss-cpu = "^1.7.4"
-python-dotenv = "^1.0.1"
-tiktoken = "^0.5.2"
-pydantic = "^2.6.1"
-streamlit = "^1.32.0"
-watchdog = "^3.0.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-black = "^23.7.0"
-isort = "^5.12.0"
-flake8 = "^6.1.0"
+python = "~3.12.3"
+python-dotenv = "^1.1.0"
+streamlit = "^1.44.1"
+langchain = "^0.3.23"
+langchain-community = "^0.3.21"
+langchain-core = "^0.3.51"
+langchain-text-splitters = "^0.3.8"
+langchain-openai = "^0.3.12"
+pypdf = "^5.4.0"
+faiss-cpu = "^1.10.0"
+tiktoken = "^0.9.0"
+pydantic = "^2.11.3"
+watchdog = "^6.0.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
